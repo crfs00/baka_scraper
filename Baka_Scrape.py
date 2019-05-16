@@ -25,32 +25,23 @@ class Baka_Scraper:
         with open('page2scrape.html', encoding='UTF-8') as f:
             Baka_Scraper.baka_html = HTML(html=f.read())
 
-        # Manga name
+        Baka_Scraper._name_description_year()
+        Baka_Scraper._author_artist()
+        Baka_Scraper._genre_demographic()
+        Baka_Scraper._category()
+
+    def _name_description_year():
+
         Baka_Scraper.manga_name_str = Baka_Scraper.baka_html.find('.releasestitle')[0].text
 
-        # Try to get the manga descripiton
         try:
             Baka_Scraper.description = Baka_Scraper.baka_html.find('#div_desc_more')[0].text.replace('Less...', '')
         except Exception as e:
             Baka_Scraper.description = Baka_Scraper.baka_html.find('div.sContent')[0].text
 
-        # Get the genre list and remove the useless information
-        Baka_Scraper.genre_list = Baka_Scraper.baka_html.find('div.sContent')[14].text.split('\n')
-        Baka_Scraper.genre_slice_end = Baka_Scraper.genre_list.index('')
-        Baka_Scraper.genre_list = Baka_Scraper.genre_list[:Baka_Scraper.genre_slice_end]
+        Baka_Scraper.manga_year = Baka_Scraper.baka_html.find('div.sContent')[20].text
 
-        # Extract the demographic from the genre list
-        for x in range(len(Baka_Scraper.genre_ctrl_list)):
-            if Baka_Scraper.genre_ctrl_list[x] in Baka_Scraper.genre_list:
-
-                Baka_Scraper.demographic_str = Baka_Scraper.genre_list.pop(Baka_Scraper.genre_list.index(Baka_Scraper.genre_ctrl_list[x]))
-
-                break
-
-        # Get catagories/tags
-        Baka_Scraper.category_list = Baka_Scraper.baka_html.find('ul')[1].text.split('\n')
-
-        # Get author and artist
+    def _author_artist():
         Baka_Scraper.author = Baka_Scraper.baka_html.find('div.sContent')[18].text
         if Baka_Scraper.author.endswith(']'):
             Baka_Scraper.author = Baka_Scraper.author[:-8]
@@ -59,15 +50,36 @@ class Baka_Scraper:
         if Baka_Scraper.artist.endswith(']'):
             Baka_Scraper.artist = Baka_Scraper.artist[:-8]
 
-        # Get manga year
-        Baka_Scraper.manga_year = Baka_Scraper.baka_html.find('div.sContent')[20].text
+    def _genre_demographic():
+        Baka_Scraper.genre_list = Baka_Scraper.baka_html.find('div.sContent')[14].text.split('\n')
+        Baka_Scraper.genre_slice_end = Baka_Scraper.genre_list.index('')
+        Baka_Scraper.genre_list = Baka_Scraper.genre_list[:Baka_Scraper.genre_slice_end]
+
+        for x in range(len(Baka_Scraper.genre_ctrl_list)):
+            if Baka_Scraper.genre_ctrl_list[x] in Baka_Scraper.genre_list:
+
+                Baka_Scraper.demographic_str = Baka_Scraper.genre_list.pop(Baka_Scraper.genre_list.index(Baka_Scraper.genre_ctrl_list[x]))
+
+                break
+
+    def _category():
+        '''
+        Meant to pull all of the categories but a link must be clicked in order to access all of them.
+        For now this function will only pull the first ten catagories.
+        '''
+        Baka_Scraper.category_list = Baka_Scraper.baka_html.find('ul')[1].text.split('\n')
 
     def show():
+        '''Display the scraped information in an easy to read format'''
         print(f'Name: {Baka_Scraper.manga_name_str}\n\nDescription: {Baka_Scraper.description}\n\nGenres: {Baka_Scraper.genre_list}\n\nDemographic: {Baka_Scraper.demographic_str}\n\nTags: {Baka_Scraper.category_list}\n\nAuthor: {Baka_Scraper.author}\n\nArtist: {Baka_Scraper.artist}\n\nYear Published: {Baka_Scraper.manga_year}')
+
+    def _write():
+        '''This method will write the print statement of  Baka_Scraper.show() to a text file'''
+        pass
 
 
 if __name__ == '__main__':
 
-    #Baka_Scraper.pull_baka_page('https://www.mangaupdates.com/series.html?id=151340')
+    # Baka_Scraper.pull_baka_page('https://www.mangaupdates.com/series.html?id=151340')
     Baka_Scraper.scrape_baka_page()
     Baka_Scraper.show()
